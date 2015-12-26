@@ -1,0 +1,25 @@
+{
+  "name": "h5table/h5table",
+  "description": "h5table is a jQuery based replacement for tables. It supports searching, remote data sets, and complete extensibility.",
+  "type": "component",
+  "homepage": "https://h5table.github.io/",
+  "license": "MIT",
+  "require": {
+    "robloach/component-installer": "*"
+  },
+  "extra": {
+    "component": {
+      "scripts": [
+        "dist/js/h5table.js"
+      ],
+      "styles": [
+        "dist/css/h5table.css"
+      ],
+      "files": [
+        "dist/js/h5table.js",
+        "dist/js/i18n/*.js",
+        "dist/css/h5table.css"
+      ]
+    }
+  }
+}

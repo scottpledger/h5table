@@ -1,0 +1,254 @@
+---
+layout: default
+title: Examples - h5table
+slug: examples
+---
+
+<script type="text/javascript" src="vendor/js/placeholders.jquery.min.js"></script>
+<script type="text/javascript" src="dist/js/i18n/es.js"></script>
+
+<style type="text/css">
+  .img-flag {
+    height: 15px;
+    width: 18px;
+  }
+</style>
+
+<section class="jumbotron">
+  <div class="container">
+    <h1>
+      Examples
+    </h1>
+  </div>
+</section>
+
+<div class="container s2-docs-container">
+  <div class="row">
+    <div class="col-md-9" role="main">
+
+      {% include examples/basics.html %}
+      {% include examples/placeholders.html %}
+      {% include examples/data.html %}
+      {% include examples/disabled-mode.html %}
+      {% include examples/disabled-results.html %}
+      {% include examples/multiple-max.html %}
+      {% include examples/hide-search.html %}
+      {% include examples/programmatic-control.html %}
+      {% include examples/tags.html %}
+      {% include examples/tokenizer.html %}
+      {% include examples/matcher.html %}
+      {% include examples/localization-rtl-diacritics.html %}
+      {% include examples/themes-templating-responsive-design.html %}
+
+    </div>
+    <div class="col-md-3" role="complementary">
+
+      {% include nav/examples.html %}
+
+    </div>
+  </div>
+</div>
+
+{% include js-source-states.html %}
+
+<script type="text/javascript">
+  var $states = $(".js-source-states");
+  var statesOptions = $states.html();
+  $states.remove();
+
+  $(".js-states").append(statesOptions);
+
+  $("[data-fill-from]").each(function () {
+    var $this = $(this);
+
+    var codeContainer = $this.data("fill-from");
+    var $container = $(codeContainer);
+
+    var code = $.trim($container.html());
+
+    $this.text(code);
+    $this.addClass("prettyprint linenums");
+  });
+
+  prettyPrint();
+
+  $.fn.h5table.amd.require([
+    "h5table/core",
+    "h5table/utils",
+    "h5table/compat/matcher"
+  ], function (h5table, Utils, oldMatcher) {
+    var $basicSingle = $(".js-example-basic-single");
+    var $basicMultiple = $(".js-example-basic-multiple");
+    var $limitMultiple = $(".js-example-basic-multiple-limit");
+
+    var $dataArray = $(".js-example-data-array");
+    var $dataArraySelected = $(".js-example-data-array-selected");
+
+    var data = [
+      { id: 0, text: 'enhancement' },
+      { id: 1, text: 'bug' },
+      { id: 2, text: 'duplicate' },
+      { id: 3, text: 'invalid' },
+      { id: 4, text: 'wontfix' }
+    ];
+
+    var $ajax = $(".js-example-data-ajax");
+
+    var $disabledResults = $(".js-example-disabled-results");
+
+    var $tags = $(".js-example-tags");
+
+    var $matcherStart = $('.js-example-matcher-start');
+
+    var $diacritics = $(".js-example-diacritics");
+    var $language = $(".js-example-language");
+
+    $.fn.h5table.defaults.set("width", "100%");
+
+    $basicSingle.h5table();
+    $basicMultiple.h5table();
+    $limitMultiple.h5table({
+      maximumSelectionLength: 2
+    });
+
+    function formatState (state) {
+      if (!state.id) {
+        return state.text;
+      }
+      var $state = $(
+        '<span>' +
+          '<img src="vendor/images/flags/' +
+            state.element.value.toLowerCase() +
+          '.png" class="img-flag" /> ' +
+          state.text +
+        '</span>'
+      );
+      return $state;
+    };
+
+    $(".js-example-templating").h5table({
+      templateResult: formatState,
+      templateSelection: formatState
+    });
+
+    $dataArray.h5table({
+      data: data
+    });
+
+    $dataArraySelected.h5table({
+      data: data
+    });
+
+    function formatRepo (repo) {
+      if (repo.loading) return repo.text;
+
+      var markup = "<div class='h5table-result-repository clearfix'>" +
+        "<div class='h5table-result-repository__avatar'><img src='" + repo.owner.avatar_url + "' /></div>" +
+        "<div class='h5table-result-repository__meta'>" +
+          "<div class='h5table-result-repository__title'>" + repo.full_name + "</div>";
+
+      if (repo.description) {
+        markup += "<div class='h5table-result-repository__description'>" + repo.description + "</div>";
+      }
+
+      markup += "<div class='h5table-result-repository__statistics'>" +
+        "<div class='h5table-result-repository__forks'><i class='fa fa-flash'></i> " + repo.forks_count + " Forks</div>" +
+        "<div class='h5table-result-repository__stargazers'><i class='fa fa-star'></i> " + repo.stargazers_count + " Stars</div>" +
+        "<div class='h5table-result-repository__watchers'><i class='fa fa-eye'></i> " + repo.watchers_count + " Watchers</div>" +
+      "</div>" +
+      "</div></div>";
+
+      return markup;
+    }
+
+    function formatRepoSelection (repo) {
+      return repo.full_name || repo.text;
+    }
+
+    $ajax.h5table({
+      ajax: {
+        url: "https://api.github.com/search/repositories",
+        dataType: 'json',
+        delay: 250,
+        data: function (params) {
+          return {
+            q: params.term, // search term
+            page: params.page
+          };
+        },
+        processResults: function (data, params) {
+          // parse the results into the format expected by h5table
+          // since we are using custom formatting functions we do not need to
+          // alter the remote JSON data, except to indicate that infinite
+          // scrolling can be used
+          params.page = params.page || 1;
+
+          return {
+            results: data.items,
+            pagination: {
+              more: (params.page * 30) < data.total_count
+            }
+          };
+        },
+        cache: true
+      },
+      escapeMarkup: function (markup) { return markup; },
+      minimumInputLength: 1,
+      templateResult: formatRepo,
+      templateSelection: formatRepoSelection
+    });
+
+    $(".js-example-disabled").h5table();
+    $(".js-example-disabled-multi").h5table();
+
+    $(".js-example-responsive").h5table();
+
+    $disabledResults.h5table();
+
+    $(".js-example-programmatic").h5table();
+    $(".js-example-programmatic-multi").h5table();
+
+    $eventSelect.h5table();
+
+    $tags.h5table({
+      tags: ['red', 'blue', 'green']
+    });
+
+    $(".js-example-tokenizer").h5table({
+      tags: true,
+      tokenSeparators: [',', ' ']
+    });
+
+    function matchStart (term, text) {
+      if (text.toUpperCase().indexOf(term.toUpperCase()) == 0) {
+        return true;
+      }
+
+      return false;
+    }
+
+    $matcherStart.h5table({
+      matcher: oldMatcher(matchStart)
+    });
+
+    $(".js-example-basic-hide-search").h5table({
+      minimumResultsForSearch: Infinity
+    });
+
+    $diacritics.h5table();
+
+    $language.h5table({
+      language: "es"
+    });
+
+    $(".js-example-theme-single").h5table({
+      theme: "classic"
+    });
+
+    $(".js-example-theme-multiple").h5table({
+      theme: "classic"
+    });
+
+    $(".js-example-rtl").h5table();
+  });
+</script>

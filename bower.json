@@ -1,0 +1,12 @@
+{
+    "name": "h5table",
+    "description": "h5table is a jQuery based replacement for tables. It supports searching, remote data sets, and complete extensibility.",
+    "main": [
+        "dist/js/h5table.js",
+        "src/scss/core.scss"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git@github.com:spledger/h5table.git"
+    }
+}
